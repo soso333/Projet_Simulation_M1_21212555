@@ -1,5 +1,6 @@
 # Projet sim propre
 from matplotlib import pylab
+import numpy as np
 
 
 class MoteurCC : 
@@ -29,10 +30,27 @@ class MoteurCC :
         self.viscosite = 0      # Force de frottement supplémentaire
         self.couple_res = 0     # Couple résistif
         
-    def __str__(self): ############# À modifier! 
+    def __str__(self):
         """ Affichage des paramètres donnés du moteur à courant continu """
         
-        msg = 'Moteur CC de paramètres : ('+str(self.R)+', '+str(self.L)+', '+str(self.kc)+', '+str(self.ke)+', '+str(self.J)+', '+str(self.f)+''
+        msg = ("Moteur CC\n"
+        f"Paramètres électriques et mécaniques :\n"
+        f"R = {self.R} Ω, L = {self.L} H\n",
+        f"    kc = {self.kc} N.m/A, ke = {self.ke} V.s/rad\n"
+        f"    J = {self.J} kg.m^2, f = {self.f} N.m.s/rad\n"
+        f"  Caractéristiques:\n"
+        f"    Um = {self.um} V\n"
+        f"    i  = {self.i[-1]} A\n"
+        f"    E  = {self.E[-1]} V\n"
+        f"    Γ  = {self.gamma[-1]} N.m\n"
+        f"    Ω  = {self.omega[-1]} rad/s\n"
+        f"    θ  = {self.position[-1]} rad\n"
+        f"  Autres grandeurs:\n"
+        f"    charge = {self.charge} kg.m^2\n"
+        f"    couple_ext = {self.couple_ext} N.m\n"
+        f"    viscosite = {self.viscosite} N.m.s/rad\n"
+        f"    couple_res = {self.couple_res} N.m"
+    )
         return msg
         
     def __repr__(self) : 
@@ -101,11 +119,21 @@ class MoteurCC :
         
         
         
-    def plot(self, temps,):
+    def plot(self, temps, omega, color):
         """ permet de tracer, directement importée du cours """
         
         from pylab import plot
-        return plot(temps, self.omega, color = 'red')  
+        return plot(temps, omega, color)  
+    
+    # Pour comparer nos résultats à celle de la solution analytique : 
+    def solution_analytique(self, temps) : 
+        """ Permet de calculer la solution analytique de la vitesse du moteur à courant continu en boucle ouverte """
+    
+        a = (self.R*self.J)/(self.ke*self.kc + self.R*self.f)
+        b = self.kc/(self.ke*self.kc + self.R*self.f)
+        omega = b*self.um*(1-np.exp(-temps/a))
+       
+        return omega
         
        
 # Début du main : 
@@ -124,10 +152,27 @@ if __name__=='__main__':
         m.setVoltage(1)
         m.simule(step)
     figure()
-    m.plot(temps)
+    m.plot(temps, m.omega, color = 'red')
     legend()
     title("Réponse indicielle du moteur CC en boucle ouverte")
+
+    #On trace également la solution analytique pour comparer
+    figure()
+    legend()
+    title("Solution analytique")
+    omega_analytique = m.solution_analytique(np.array(temps))
+    m.plot(temps, omega_analytique, color = 'blue')
+
+    #Comparaison des deux solutions (numérique et analytique)
+    figure()
+    legend()
+    title("Comparaison des solutions numérique et analytique")
+    m.plot(temps, m.omega, color = 'red')
+    m.plot(temps, omega_analytique, color = 'blue')
+    
     show()
+
+
         
         
 
