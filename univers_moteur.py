@@ -102,6 +102,7 @@ class Univers(object):
                 t.gameDraw(self.scale,screen)
             
             
+            #on met en commentaire car sinon l'écriture est à l'envers 
             # get y axis upwards, origin on bottom left : La fenetre pygame a l'axe y vers le bas. On le retourne.
             #flip_surface = pygame.transform.flip(screen, False, flip_y=True)
             #screen.blit(flip_surface, (0, 0))
