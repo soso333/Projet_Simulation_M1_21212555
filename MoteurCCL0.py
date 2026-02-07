@@ -6,7 +6,7 @@ import numpy as np
 class MoteurCC : 
     """ Simulateur d'un moteur à courant continu """
     
-    def __init__(self, R=1, L=0, kc=0.01, ke=0.01, J = 0.01, f=0.1):
+    def __init__(self, R=1, L=0, kc=0.01, ke=0.01, J = 0.01, f=0.1, color='orange', position_ecran=(300, 390)):
         
         # Grandeur connue 
         self.R = R              # Résistance de l'induit
@@ -15,6 +15,10 @@ class MoteurCC :
         self.ke = ke            # Constante de la fcem
         self.J = J              # Inertie du rotor 
         self.f = f              # Constante de frottement visqueux
+
+        #ajout pour l'implémentation de la classe univers
+        self.color = color
+        self.position_x, self.position_y = position_ecran #position dans la fenetre pygame
         
         # caractéristiques qu'on ne connait que plus tard grâce aux pochaines fonctions :
         self.um = 0             # Tension aux bornes du moteur - donné par la fonction set voltage
@@ -135,6 +139,27 @@ class MoteurCC :
        
         return omega
         
+    
+    #ajout pour l'implémentation de la classe univers
+    def gameDraw(self,scale,screen):
+        import pygame
+        
+        # dessin stator 
+        pygame.draw.circle(screen,(150,150,150),(self.position_x,self.position_y),50,2)
+
+        # dessin du rotor : 
+        angle = self.getPosition() 
+        
+        # calcul de la position du rotor :
+        X = self.position_x + 45*np.cos(angle)
+        Y = self.position_y - 45*np.sin(angle)
+          
+        pygame.draw.line(screen,self.color,(self.position_x,self.position_y),(X,Y),2)
+        pygame.draw.circle(screen,self.color,(X,Y),5)
+
+        font = pygame.font.Font(None, 24)
+        img = font.render(f"Vitesse: {self.getSpeed():.2f} rad/s", True, (0, 0, 0))
+        screen.blit(img, (self.position_x - 40, self.position_y + 60))
        
 # Début du main : 
     

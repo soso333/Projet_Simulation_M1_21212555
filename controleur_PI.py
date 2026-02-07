@@ -75,8 +75,8 @@ if __name__=='__main__':
 
     m_bf = MoteurCC() # moteur boucle fermé pour le controleur
 
-    P = m_bf.Kp = 10 # valeur arbitraire
-    I = m_bf.Ki = 50 # valeur arbitraire
+    P = m_bf.Kp = 10 # valeur arbitraire 10
+    I = m_bf.Ki = 50# valeur arbitraire 50
     D = m_bf.Kd = 0
 
 

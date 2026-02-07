@@ -5,12 +5,16 @@ import numpy as np
 class ControlPID_vitesse_3:
     """ Contrôleur PID pour la vitesse d'un moteur à courant continu """
 
-    def __init__(self, K_P, K_I, K_D, moteurCC):
+    def __init__(self, K_P, K_I, K_D, moteurCC, color = 'blue', position_ecran=(512, 390)):
 
         self.K_P = K_P
         self.K_I = K_I
         self.K_D = K_D
         self.moteurCC = moteurCC
+
+        #ajout pour l'implémentation de la classe univers
+        self.color = color
+        self.position_x, self.position_y = position_ecran #position dans la fenetre pygame
 
         # Entrée et sortie du contrôleur :
         self.vitesse_des = 0
@@ -46,12 +50,12 @@ class ControlPID_vitesse_3:
 
         # 2) On calcule l'erreur
         err = self.vitesse_des - vitesse_actuelle
-        self.erreur.append(err)
 
         # On calcule l'erreur dérivée : 
-        self.erreur_derivee = (err - self.erreur[-1]/step)
+        self.erreur_derivee = (err - self.erreur[-1])/step
 
         # 3) : On calcule l'erreur intégrale : 
+        self.erreur.append(err) #màj de l'erreur ici sinon ça pose un pb pour dérivée
         self.erreur_integrale += err*step 
 
         #3) On applique la loi de commande PI
@@ -68,6 +72,28 @@ class ControlPID_vitesse_3:
         
         from pylab import plot
         return plot(temps, self.moteurCC.getSpeed())  
+    
+    #ajout pour l'implémentation de la classe univers - aide extérieure pour l'interface graphique (en toute honneteté)
+    def gameDraw(self,scale,screen):
+        import pygame
+        
+        # dessin stator 
+        pygame.draw.circle(screen,(100,100,100),(self.position_x,self.position_y),50,2)
+
+        # dessin du rotor : 
+        angle = self.moteurCC.getPosition() 
+        
+        # calcul de la position du rotor :
+        X = self.position_x + 45*np.cos(angle)
+        Y = self.position_y + 45*np.sin(angle)
+          
+        pygame.draw.line(screen,self.color,(self.position_x,self.position_y),(X,Y),2)
+        pygame.draw.circle(screen,self.color,(X,Y),5)
+
+        font = pygame.font.Font(None, 24)
+        img = font.render(f"PID: {self.moteurCC.getSpeed():.2f} rad/s", True, (0, 0, 0))
+        screen.blit(img, (self.position_x - 40, self.position_y + 60))
+        
 
 if __name__=='__main__':
     from pylab import figure, show, legend, title
