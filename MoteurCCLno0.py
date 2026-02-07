@@ -6,7 +6,7 @@ import numpy as np
 class MoteurCC_2 : 
     """ Simulateur d'un moteur à courant continu sans l'approximation L = 0 """
     
-    def __init__(self, R=1, L=0.01, kc=0.01, ke=0.01, J = 0.01, f=0.1 ):
+    def __init__(self, R=1, L=1, kc=0.01, ke=0.01, J = 0.01, f=0.1 ):
         
         # Grandeur connue 
         self.R = R              # Résistance de l'induit

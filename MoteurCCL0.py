@@ -6,14 +6,14 @@ import numpy as np
 class MoteurCC : 
     """ Simulateur d'un moteur à courant continu """
     
-    def __init__(self, R=1, L=0, kc=0.01, ke=0.01, J = 0.01, f=0.1 ):
+    def __init__(self, R=1, L=0, kc=0.01, ke=0.01, J = 0.01, f=0.1):
         
         # Grandeur connue 
         self.R = R              # Résistance de l'induit
         self.L = L              # Inductance de l'induit
         self.kc = kc            # Constante de couple
         self.ke = ke            # Constante de la fcem
-        self.J = J              # Inertie du rotor
+        self.J = J              # Inertie du rotor 
         self.f = f              # Constante de frottement visqueux
         
         # caractéristiques qu'on ne connait que plus tard grâce aux pochaines fonctions :
@@ -146,7 +146,7 @@ if __name__=='__main__':
     t = 0
     step = 0.01
     temps = [t]
-    while t<2 :
+    while t<20 :
         t=t+step
         temps.append(t)
         m.setVoltage(1)
@@ -169,7 +169,7 @@ if __name__=='__main__':
     title("Comparaison des solutions numérique et analytique")
     m.plot(temps, m.omega, color = 'red')
     m.plot(temps, omega_analytique, color = 'blue')
-    
+
     show()
 
 
