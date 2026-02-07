@@ -2,7 +2,7 @@ from MoteurCCL0 import MoteurCC
 import matplotlib.pyplot as plt
 import numpy as np
 
-class ControlPID_vitesse :
+class ControlPID_vitesse_2 :
     """ Contrôleur PID pour la vitesse d'un moteur à courant continu """
 
     def __init__(self, K_P, K_I, K_D, moteurCC):
@@ -19,6 +19,8 @@ class ControlPID_vitesse :
 
         #definition des erreurs 
         self.erreur = [0]
+        self.erreur_integrale = 0 #c'est la somme des erreurs
+        self.erreur_derivative = 0
 
 
     def __str__(self):
@@ -46,8 +48,11 @@ class ControlPID_vitesse :
         err = self.vitesse_des - vitesse_actuelle
         self.erreur.append(err)
 
-        # 3) On applique la loi de commande porportionnelle (pour un contrôleur P uniquement)
-        self.tension_envoyee_moteur = self.K_P*err
+        # 3) : On calcule l'erreur intégrale : 
+        self.erreur_integrale += err*step 
+
+        #3) On applique la loi de commande PI
+        self.tension_envoyee_moteur = self.K_P*err + self.K_I*self.erreur_integrale 
 
         # 4) On applique la tension au moteur
         self.moteurCC.setVoltage(self.tension_envoyee_moteur) 
@@ -70,12 +75,12 @@ if __name__=='__main__':
 
     m_bf = MoteurCC() # moteur boucle fermé pour le controleur
 
-    P = m_bf.Kp = 10
-    I = m_bf.Ki = 0
+    P = m_bf.Kp = 10 # valeur arbitraire
+    I = m_bf.Ki = 50 # valeur arbitraire
     D = m_bf.Kd = 0
 
 
-    control = ControlPID_vitesse(P,I,D , m_bf)
+    control = ControlPID_vitesse_2(P,I,D , m_bf)
     t = 0
     step = 0.01
     temps = [t]
@@ -91,9 +96,4 @@ if __name__=='__main__':
     m_bo.plot(temps, m_bo.omega, color = 'red')
     m_bf.plot(temps, m_bf.omega, color = 'blue')
     legend(['Boucle ouverte', 'Boucle fermée'])
-
-    figure()
-    m_bf.plot(temps, control.erreur, color = 'green')
-    legend(['Erreur de vitesse'])
-    title("Erreur de vitesse du moteur à courant continu en boucle fermée")
     show()

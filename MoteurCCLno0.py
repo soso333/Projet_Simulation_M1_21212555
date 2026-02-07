@@ -6,14 +6,14 @@ import numpy as np
 class MoteurCC_2 : 
     """ Simulateur d'un moteur à courant continu sans l'approximation L = 0 """
     
-    def __init__(self, R=1, L=1, kc=0.01, ke=0.01, J = 0.01, f=0.1 ):
+    def __init__(self, R=1, L=0.01, kc=0.01, ke=0.01, J = 0.01, f=0.1):
         
         # Grandeur connue 
         self.R = R              # Résistance de l'induit
         self.L = L              # Inductance de l'induit
         self.kc = kc            # Constante de couple
         self.ke = ke            # Constante de la fcem
-        self.J = J              # Inertie du rotor
+        self.J = J # Inertie du rotor + charge
         self.f = f              # Constante de frottement visqueux
         
         # caractéristiques qu'on ne connait que plus tard grâce aux pochaines fonctions :

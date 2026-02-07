@@ -146,7 +146,7 @@ if __name__=='__main__':
     t = 0
     step = 0.01
     temps = [t]
-    while t<20 :
+    while t<2 :
         t=t+step
         temps.append(t)
         m.setVoltage(1)
