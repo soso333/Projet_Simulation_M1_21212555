@@ -48,8 +48,8 @@ class Barre2D :
         if self.fixed == True : 
             acceleration = V3D()
             vitesse = V3D()
-            omega = V3D().z
-            omegadot = V3D().z
+            omega = 0
+            omegadot = 0
             p_angulaire = self.theta[-1]
             p = self.pos[-1]
         
@@ -166,16 +166,20 @@ class SpringDumper(Force) :
 
     def setForce(self, barre2D):
 
+        #on fait tourner pos1 et pos2
+        r0 = V3D(self.pos0.x, self.pos0.y, self.pos0.z).rotZ(self.P0.theta[-1]) #ajout
+        r1 = V3D(self.pos1.x, self.pos1.y, self.pos1.z).rotZ(self.P1.theta[-1]) #ajout
+
         #récupération des positions 
-        p0_pos = self.P0.pos[-1]
-        p1_pos = self.P1.pos[-1]
+        p0_pos = self.P0.pos[-1]  + r0 #debug
+        p1_pos = self.P1.pos[-1] + r1 #debug
 
         vec_dir = p1_pos - p0_pos
         v_n = vec_dir.mod() #debug
         if v_n == 0 : 
             return
         v_unit = vec_dir * (1/v_n)
-        flex = vec_dir.mod()-self.l0
+        flex = v_n-self.l0
         
         vit = self.P1.vitesse[-1] - self.P0.vitesse[-1]
         vit_n = (vit.x * v_unit.x + vit.y* v_unit.y) * self.c 
@@ -183,19 +187,36 @@ class SpringDumper(Force) :
         force = (self.k * flex + vit_n)* v_unit
 
         if barre2D == self.P0:
-            barre2D.applyEffort(Force=force, pos=self.pos0)
+            barre2D.applyEffort(Force=force, pos=r0)
         elif barre2D == self.P1:
-            barre2D.applyEffort(Force=-force, pos=self.pos1)
+            barre2D.applyEffort(Force=-force, pos=r1)
         else:
             pass
+
+    def gameDraw(self, scale, screen):
+        import pygame
+        # 1. Calcul des positions (comme précédemment)
+        r0 = V3D(self.pos0.x, self.pos0.y, self.pos0.z).rotZ(self.P0.theta[-1])
+        r1 = V3D(self.pos1.x, self.pos1.y, self.pos1.z).rotZ(self.P1.theta[-1])
+
+        p0_abs = self.P0.pos[-1] + r0
+        p1_abs = self.P1.pos[-1] + r1
+
+        # 2) Conversion en pixels
+        pos0_pix = (int(p0_abs.x * scale), int(p0_abs.y * scale))
+        pos1_pix = (int(p1_abs.x * scale), int(p1_abs.y * scale))
+
+        # 3. Dessin d'une ligne noire (épaisseur 2)
+        pygame.draw.line(screen, (0, 0, 0), pos0_pix, pos1_pix, 2)
+
 
 class TorsionSpringDumper(Force) : 
     """ Force de rappel d'un ressort - pas selon les distances mais selon les angles cette fois, on ne s'occupe plus de la distance"""
 
     def __init__(self,P0,P1,k_rot=2,c_rot=1,active=True,name="torsion_spring_and_damper"):
         Force.__init__(self,V3D(),name,active)
-        self.k = k_rot
-        self.c = c_rot # coefficient d'amortissement
+        self.k_rot = k_rot
+        self.c_rot = c_rot # coefficient d'amortissement
         self.P0 = P0
         self.P1 = P1
 
@@ -229,10 +250,4 @@ class Liaison :
     def prismatique(barre1, barre2, distance_gliss=V3D(), k_rot=10000, c_rot=10) :
 
         #on bloque la rotation
-        return TorsionSpringDumper(barre1, barre2, k_rot, c_rot)
-         
-
-
-
-
-
+        return TorsionSpringDumper(barre1, barre2, k_rot, c_rot)   

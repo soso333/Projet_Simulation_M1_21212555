@@ -83,7 +83,12 @@ class Univers(object):
         while running:
             screen.fill((240,240,240)) # effacer les images du pas précédent
             
+            for i in self.population : 
+                i.gameDraw(self.scale, screen)
 
+            for i in self.generators : #vérifier si l'objet sait se dessiner ou non
+                if hasattr(i, 'gameDraw') : 
+                    i.gameDraw(self.scale, screen)
 
             pygame.event.pump() # process event queue
             keys = pygame.key.get_pressed() # It gets the states of all keyboard keys.
@@ -147,26 +152,17 @@ except Exception as e:
 #--------------------------------------------
 
 if __name__=='__main__':
+
     from pylab import figure, show, legend
     
     monUnivers = Univers(game=True)
-    
     monUnivers.step=0.01
-    
-    B1 = Barre2D(pos=V3D(50,50,0), fixed=True, nom="fixe")
-    B2 = Barre2D(mass=4,long=2,pos=V3D(60,50), fixed=False, color="green", nom="mobile")
-    
-    liaison = SpringDumper(B1, B2, 500, 20, 0, V3D(0, 50), V3D(0,20))
-    
+    B1 = Barre2D(pos=V3D(50,60,0), fixed=True, nom="fixe", long=10)
+    B2 = Barre2D(mass=100,long=5,pos=V3D(65,70), fixed=False, color="green", nom="mobile", theta=0)
+    liaison = SpringDumper(P0=B1, P1=B2, k=100, c=2, l0=15, pos0=V3D(0, 0), pos1=V3D(0,2.5))
     force = Gravity(V3D(0,-10))
-    
     monUnivers.addParticule(B1,B2)
     monUnivers.addGenerators(force,liaison)
-    
 
-    
     monUnivers.simulateRealTime()
-    
     monUnivers.plot()
-
-    

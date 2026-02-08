@@ -72,11 +72,11 @@ class Vector3D():
     def rotZ(self,theta):
         from numpy import cos, sin
         
-        x = cos(theta)*self.x - sin(theta)*self.y
-        y = cos(theta)*self.y + sin(theta)*self.x
+        nv_x = cos(theta)*self.x - sin(theta)*self.y
+        nv_y = cos(theta)*self.y + sin(theta)*self.x
         
-        self.x = x
-        self.y = y
+        self.x = nv_x
+        self.y = nv_y
         return self
  
     def save(self,nom='vec.dat'):
