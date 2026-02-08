@@ -138,9 +138,8 @@ class Gravity(Force) :
     """ Force de gravité - reprise du cours"""
 
     def __init__(self,g=V3D(0,-9.8),name='gravity',active=True):
+        super().__init__(force=V3D(), moment=V3D(),pos=V3D(), name=name, active=active )
         self.g = g
-        self.name = name
-        self.active = active
 
     def setForce(self,barre2D):
         if self.active:
@@ -155,7 +154,7 @@ class Gravity(Force) :
 class SpringDumper(Force) : 
     """ définition ressort, reprise du cours, translation """
     def __init__(self,P0,P1,k=0,c=0,l0=0,active=True,name="spring_and_damper", pos0=V3D(), pos1=V3D()):
-        Force.__init__(self,V3D(),name,active)
+        Force.__init__(self,force=V3D(),moment=V3D(), pos=V3D(), name=name,active=active)
         self.k = k
         self.c = c
         self.P0 = P0
@@ -214,7 +213,7 @@ class TorsionSpringDumper(Force) :
     """ Force de rappel d'un ressort - pas selon les distances mais selon les angles cette fois, on ne s'occupe plus de la distance"""
 
     def __init__(self,P0,P1,k_rot=2,c_rot=1,active=True,name="torsion_spring_and_damper"):
-        Force.__init__(self,V3D(),name,active)
+        Force.__init__(self,force=V3D(), moment=V3D(), pos=V3D(),name=name,active=active)
         self.k_rot = k_rot
         self.c_rot = c_rot # coefficient d'amortissement
         self.P0 = P0
@@ -245,7 +244,7 @@ class TorsionSpringDumper(Force) :
     
 class Liaison : 
     def pivot(barre1, barre2, pos1=V3D(), pos2=V3D(), k=5000, c=2, l0=3) :
-        return SpringDumper(barre1, barre2, k, c, l0, pos1, pos2)
+        return SpringDumper(P0=barre1, P1=barre2, k=k, c=c, l0=l0, pos0=pos1, pos1=pos2)
     
     def prismatique(barre1, barre2, distance_gliss=V3D(), k_rot=10000, c_rot=10) :
 

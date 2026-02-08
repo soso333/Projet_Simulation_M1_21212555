@@ -157,12 +157,12 @@ if __name__=='__main__':
     
     monUnivers = Univers(game=True)
     monUnivers.step=0.01
-    B1 = Barre2D(pos=V3D(50,60,0), fixed=True, nom="fixe", long=10)
-    B2 = Barre2D(mass=100,long=5,pos=V3D(65,70), fixed=False, color="green", nom="mobile", theta=0)
-    liaison = SpringDumper(P0=B1, P1=B2, k=100, c=2, l0=15, pos0=V3D(0, 0), pos1=V3D(0,2.5))
+    B1 = Barre2D(pos=V3D(50,60,0), fixed=True, nom="fixe", long=10) 
+    B2 = Barre2D(mass=10,long=5,pos=V3D(65,70), fixed=False, color="green", nom="mobile", theta=0) 
+    liaison = SpringDumper(P0=B1, P1=B2, k=100, c=200, l0=15, pos0=V3D(0, 0), pos1=V3D(0,2.5)) 
     force = Gravity(V3D(0,-10))
     monUnivers.addParticule(B1,B2)
-    monUnivers.addGenerators(force,liaison)
+    monUnivers.addGenerators(force,liaison) 
 
     monUnivers.simulateRealTime()
     monUnivers.plot()
