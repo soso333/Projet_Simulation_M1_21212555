@@ -7,7 +7,7 @@ from controleur_PID import ControlPID_vitesse_3
 class TurtleRoue(Turtle) : 
     """ Classe permettant de simuler des turtlesbot avec des roues et non vitesse de translation et de rotation directement. """
 
-    def __init__(self, position=V3D(10,10), rotation=0, name='TurtleRoue', color="red", rayon = 0.2, distance = 0.5):
+    def __init__(self, position=V3D(50,50), rotation=0, name='TurtleRoue', color="red", rayon = 0.2, distance = 5, Kp=1, Ki=5, Kd = 0):
 
          # On récupère les paramètres de la classe turtlebot
         super().__init__(position, rotation, name, color)
@@ -26,6 +26,12 @@ class TurtleRoue(Turtle) :
         self.vitesse_roue_bas_gauche = 0
         self.vitesse_roue_haut_droite = 0
         self.vitesse_roue_bas_droite = 0
+
+        #définition des PID : 
+        self.pid_haut_gauche = ControlPID_vitesse_3(Kp,Ki,Kd, self.moteur_haut_gauche)
+        self.pid_bas_gauche = ControlPID_vitesse_3(Kp,Ki,Kd, self.moteur_bas_gauche)
+        self.pid_haut_droit = ControlPID_vitesse_3(Kp,Ki,Kd, self.moteur_haut_droit)
+        self.pid_bas_droit = ControlPID_vitesse_3(Kp,Ki,Kd, self.moteur_bas_droit)
 
 
     def __str__(self) : 
@@ -50,10 +56,10 @@ class TurtleRoue(Turtle) :
     def move(self, step): # on l'appelle move pour écraser move de la classe parent pour bien fonctionner avec univers
 
         # Calcul de la vitesse des moteurs 
-        self.moteur_haut_gauche.simule(step)
-        self.moteur_bas_gauche.simule(step)
-        self.moteur_haut_droit.simule(step)
-        self.moteur_bas_droit.simule(step)
+        self.pid_haut_gauche.simule(step)
+        self.pid_bas_gauche.simule(step)
+        self.pid_haut_droit.simule(step)
+        self.pid_bas_droit.simule(step)
         
         #On donne la vitesse de rotation de chaque calculée avec simule : 
         self.vitesse_roue_haut_gauche = self.moteur_haut_gauche.getSpeed()
@@ -86,19 +92,10 @@ if __name__ == "__main__":
     #on crée une turtle à roue
     tortue_roue = TurtleRoue()
 
-    # On défini les PID
-    P = 10
-    I = 500
-    D = 0.1
-
-    pid_haut_gauche = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_haut_gauche)
-    pid_bas_gauche = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_bas_gauche)
-    pid_haut_droit = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_haut_droit)
-    pid_bas_droit = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_bas_droit)
-
-    #definition des vitesses desiree
-    vitesse_des_gauche = 50
-    vitesse_des_droite = 10
+    pid_haut_gauche = tortue_roue.pid_haut_gauche
+    pid_bas_gauche = tortue_roue.pid_bas_gauche
+    pid_haut_droit = tortue_roue.pid_haut_droit
+    pid_bas_droit = tortue_roue.pid_bas_droit
 
     #ON ajout ma tortue à l'univers
     monUnivers.addUnit(tortue_roue)
@@ -107,22 +104,49 @@ if __name__ == "__main__":
     t = 0
     step = 0.01 
     temps = []
-    while t < 10: 
+    while t < 10:
         t += step
         temps.append(t)
 
-        #réglage PID
-        pid_haut_gauche.setTarget(vitesse_des_gauche)
-        pid_haut_gauche.simule(step)
+        if t < 2 : 
+            #definition des vitesses desiree
+            vitesse_des_gauche = 50
+            vitesse_des_droite = 10
+            #réglage PID
+            pid_haut_gauche.setTarget(vitesse_des_gauche)
+            pid_bas_gauche.setTarget(vitesse_des_gauche)
+            pid_haut_droit.setTarget(vitesse_des_droite)
+            pid_bas_droit.setTarget(vitesse_des_droite)
         
-        pid_bas_gauche.setTarget(vitesse_des_gauche)
-        pid_bas_gauche.simule(step)
-
-        pid_haut_droit.setTarget(vitesse_des_droite)
-        pid_haut_droit.simule(step)
-
-        pid_bas_droit.setTarget(vitesse_des_droite)
-        pid_bas_droit.simule(step)
+        elif t < 5 : 
+            #definition des vitesses desiree
+            vitesse_des_gauche = 30
+            vitesse_des_droite = 5
+            #réglage PID
+            pid_haut_gauche.setTarget(vitesse_des_gauche)
+            pid_bas_gauche.setTarget(vitesse_des_gauche)
+            pid_haut_droit.setTarget(vitesse_des_droite)
+            pid_bas_droit.setTarget(vitesse_des_droite)
+        
+        elif t < 8 : 
+            #definition des vitesses desiree
+            vitesse_des_gauche = 40
+            vitesse_des_droite = 10
+            #réglage PID
+            pid_haut_gauche.setTarget(vitesse_des_gauche)
+            pid_bas_gauche.setTarget(vitesse_des_gauche)
+            pid_haut_droit.setTarget(vitesse_des_droite)
+            pid_bas_droit.setTarget(vitesse_des_droite)
+        
+        else : 
+            #definition des vitesses desiree
+            vitesse_des_gauche = 10
+            vitesse_des_droite = 20
+            #réglage PID
+            pid_haut_gauche.setTarget(vitesse_des_gauche)
+            pid_bas_gauche.setTarget(vitesse_des_gauche)
+            pid_haut_droit.setTarget(vitesse_des_droite)
+            pid_bas_droit.setTarget(vitesse_des_droite)
 
         tortue_roue.move(step)
 
