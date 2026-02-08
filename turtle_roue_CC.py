@@ -86,8 +86,19 @@ if __name__ == "__main__":
     #on crée une turtle à roue
     tortue_roue = TurtleRoue()
 
-    # On set la tension envoyée à gauche et à droite
-    tortue_roue.set_voltage(50,30,200,100)
+    # On défini les PID
+    P = 10
+    I = 500
+    D = 0.1
+
+    pid_haut_gauche = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_haut_gauche)
+    pid_bas_gauche = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_bas_gauche)
+    pid_haut_droit = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_haut_droit)
+    pid_bas_droit = ControlPID_vitesse_3(P,I,D, tortue_roue.moteur_bas_droit)
+
+    #definition des vitesses desiree
+    vitesse_des_gauche = 50
+    vitesse_des_droite = 10
 
     #ON ajout ma tortue à l'univers
     monUnivers.addUnit(tortue_roue)
@@ -99,6 +110,20 @@ if __name__ == "__main__":
     while t < 10: 
         t += step
         temps.append(t)
+
+        #réglage PID
+        pid_haut_gauche.setTarget(vitesse_des_gauche)
+        pid_haut_gauche.simule(step)
+        
+        pid_bas_gauche.setTarget(vitesse_des_gauche)
+        pid_bas_gauche.simule(step)
+
+        pid_haut_droit.setTarget(vitesse_des_droite)
+        pid_haut_droit.simule(step)
+
+        pid_bas_droit.setTarget(vitesse_des_droite)
+        pid_bas_droit.simule(step)
+
         tortue_roue.move(step)
 
     figure()
