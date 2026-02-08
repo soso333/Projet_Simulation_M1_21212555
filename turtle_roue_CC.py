@@ -37,15 +37,15 @@ class TurtleRoue(Turtle) :
     def __repr__(self) :
         return str(self)
     
-    def set_voltage(self, um_gauche, um_droite) : 
+    def set_voltage(self, um_gauche_haut, um_droite_haut, um_gauche_bas, um_droite_bas) : 
 
         #partie gauche
-        self.moteur_haut_gauche.setVoltage(um_gauche)
-        self.moteur_bas_gauche.setVoltage(um_gauche)
+        self.moteur_haut_gauche.setVoltage(um_gauche_haut)
+        self.moteur_bas_gauche.setVoltage(um_gauche_bas)
 
         #partie droite 
-        self.moteur_haut_droit.setVoltage(um_droite)
-        self.moteur_bas_droit.setVoltage(um_droite)
+        self.moteur_haut_droit.setVoltage(um_droite_haut)
+        self.moteur_bas_droit.setVoltage(um_droite_bas)
 
     def move(self, step): # on l'appelle move pour écraser move de la classe parent pour bien fonctionner avec univers
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     tortue_roue = TurtleRoue()
 
     # On set la tension envoyée à gauche et à droite
-    tortue_roue.set_voltage(100,100)
+    tortue_roue.set_voltage(50,30,200,100)
 
     #ON ajout ma tortue à l'univers
     monUnivers.addUnit(tortue_roue)
