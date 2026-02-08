@@ -64,17 +64,17 @@ class MoteurCentrifugeuse_2:
         pygame.draw.circle(screen,(150,150,150),(self.position_x,self.position_y),50,2)
 
         # dessin du rotor : 
-        X = self.position_x + 45*np.cos(self.moteur_bf.getPosition())
-        Y = self.position_y - 45*np.sin(self.moteur_bf.getPosition())
+        X = self.position_x + 45*np.cos(self.moteur_bf.moteurCC.getPosition())
+        Y = self.position_y - 45*np.sin(self.moteur_bf.moteurCC.getPosition())
 
         #dessin particule : 
-        self.particule.gameDraw(scale, screen, centre=(self.position_x,self.position_y), angle=self.moteur_bf.getPosition())
+        self.particule.gameDraw(scale, screen, centre=(self.position_x,self.position_y), angle=self.moteur_bf.moteurCC.getPosition())
         
         pygame.draw.line(screen,self.color,(self.position_x,self.position_y),(X,Y),2)
         pygame.draw.circle(screen,self.color,(X,Y),5)
 
         font = pygame.font.Font(None, 24)
-        img = font.render(f"Vitesse: {self.moteur_bf.getSpeed():.2f} rad/s", True, (0, 0, 0))
+        img = font.render(f"Vitesse: {self.moteur_bf.moteurCC.getSpeed():.2f} rad/s", True, (0, 0, 0))
         screen.blit(img, (self.position_x - 40, self.position_y + 60))
        
 
@@ -107,7 +107,7 @@ if __name__=='__main__':
     #ajout PID pour le moteur centrifugeuse :
     P = 10
     I = 50
-    D = 1
+    D = 0.1
 
     controleur = ControlPID_vitesse_3(P,I,D , m)
 

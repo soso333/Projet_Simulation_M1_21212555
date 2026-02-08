@@ -129,6 +129,7 @@ if __name__=='__main__':
         temps.append(t)
         P0.simule(step, omega_moteur=2) # on suppose que le moteur tourne à une vitesse constante de 2 rad/s - pour ne pas ajouter moteurCC pour le momen
         
+    print()
     figure()
     P0.plot(temps, P0.d, 'blue')
     title("Position de la particule en fonction du temps")
