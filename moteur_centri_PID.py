@@ -57,25 +57,42 @@ class MoteurCentrifugeuse_2:
         return plot(temps, omega, color)  
         
     #ajout pour l'implémentation de la classe univers - aide extérieure : 
-    def gameDraw(self,scale,screen):
+    def gameDraw(self, scale, screen):
         import pygame
+        import math
+
+        # 1. Dessin d'un rail de guidage (le bras de la centrifugeuse)
+        # On dessine un bras qui va jusqu'à une distance fixe (ex: 2m) pour montrer le chemin
+        longueur_bras = 2.0 * scale 
+        angle = self.moteur_bf.moteurCC.getPosition()
+        ax = self.position_x + longueur_bras * math.cos(angle)
+        ay = self.position_y - longueur_bras * math.sin(angle)
         
-        # dessin stator 
-        pygame.draw.circle(screen,(150,150,150),(self.position_x,self.position_y),50,2)
-
-        # dessin du rotor : 
-        X = self.position_x + 45*np.cos(self.moteur_bf.moteurCC.getPosition())
-        Y = self.position_y - 45*np.sin(self.moteur_bf.moteurCC.getPosition())
-
-        #dessin particule : 
-        self.particule.gameDraw(scale, screen, centre=(self.position_x,self.position_y), angle=self.moteur_bf.moteurCC.getPosition())
+        # On dessine le bras en gris épais pour simuler un rail rigide
+        pygame.draw.line(screen, (200, 200, 200), (self.position_x, self.position_y), (ax, ay), 10)
         
-        pygame.draw.line(screen,self.color,(self.position_x,self.position_y),(X,Y),2)
-        pygame.draw.circle(screen,self.color,(X,Y),5)
+        # 2. On appelle le dessin de la particule (qui dessine son ressort par-dessus)
+        self.particule.gameDraw(scale, screen, centre=(self.position_x, self.position_y), angle=angle)
+        
+        # 3. Dessin du moyeu central (le moteur)
+        pygame.draw.circle(screen, (50, 50, 50), (self.position_x, self.position_y), 20) # Centre moteur
+        
+        # 4. --- AJOUT : PANNEAU D'INFORMATIONS ---
+        font = pygame.font.Font(None, 28)
+        # Fond blanc pour le texte
+        pygame.draw.rect(screen, (255, 255, 255), (10, 10, 250, 120))
+        pygame.draw.rect(screen, (0, 0, 0), (10, 10, 250, 120), 2) # Bordure
+        
+        # Textes
+        txt_vitesse = font.render(f"Vitesse: {self.moteur_bf.moteurCC.getSpeed():.2f} rad/s", True, (0, 0, 0))
+        txt_pos = font.render(f"Distance d: {self.particule.getPosition():.2f} m", True, (0, 100, 0))
+        txt_deq = font.render(f"Equilibre d_eq: {self.calcul_d_eq():.2f} m", True, (0, 0, 200))
+        txt_pid = font.render(f"Kp: {self.moteur_bf.K_P} | Ki: {self.moteur_bf.K_I}", True, (150, 0, 0))
 
-        font = pygame.font.Font(None, 24)
-        img = font.render(f"Vitesse: {self.moteur_bf.moteurCC.getSpeed():.2f} rad/s", True, (0, 0, 0))
-        screen.blit(img, (self.position_x - 40, self.position_y + 60))
+        screen.blit(txt_vitesse, (20, 20))
+        screen.blit(txt_pos, (20, 45))
+        screen.blit(txt_deq, (20, 70))
+        screen.blit(txt_pid, (20, 95))
        
 
     def calcul_d_eq(self) : 

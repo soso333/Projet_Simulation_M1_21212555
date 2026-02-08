@@ -8,7 +8,7 @@ from moteur_centri_PID import MoteurCentrifugeuse_2
 from particule import ParticuleLagrange
 
 class Univers_2:
-    def __init__(self,name='Moteur_centrifugeuse',t0=0,step=0.1,dimensions=(100,100),game=False,gameDimensions=(1024,780),fps=60):
+    def __init__(self,name='Moteur_centrifugeuse',t0=0,step=0.1,dimensions=(10,10),game=False,gameDimensions=(1024,780),fps=60):
         self.name=name
         self.time=[t0]
         self.population = []
@@ -78,9 +78,6 @@ class Univers_2:
         # début simulation
         while running:
             screen.fill((240,240,240)) # effacer les images du pas précédent
-            
-
-
             pygame.event.pump() # process event queue
             keys = pygame.key.get_pressed() # It gets the states of all keyboard keys.
             events = pygame.event.get()
@@ -138,7 +135,7 @@ except Exception as e:
 if __name__=='__main__':
     from pylab import figure, show, legend
     
-    monUnivers = Univers_2(game=True)
+    monUnivers = Univers_2(game=True, dimensions=(10,10))
     
     monUnivers.step=0.01
     
@@ -159,6 +156,7 @@ if __name__=='__main__':
     monUnivers.addMoteur(m_centri)
     
     def myInteraction(self, events,keys):
+        import math, pygame
 
         # controle de leader avec le clavier
         if keys[ord('z')] or keys[pygame.K_UP]: # And if the key is z or K_DOWN:
@@ -197,6 +195,16 @@ if __name__=='__main__':
                 controleur.erreur_integrale = 0 
                 # On a remis à 0 l'erreur - c'est un reset
 
+            if pygame.mouse.get_pressed()[0]: # Clic gauche
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                # Calcul de la distance entre le centre (512, 390) et la souris
+                dx = mouse_x - 512
+                dy = 390 - mouse_y # Inversion Y
+                nouvelle_dist = math.sqrt(dx**2 + dy**2) / self.scale
+                
+                # On force la position de la particule
+                p.d = [nouvelle_dist]
+                p.dot_d = [0] # On arrête sa vitesse radiale
          
 # Surcharge de la fonction ici
     monUnivers.gameInteraction = MethodType(myInteraction,monUnivers)

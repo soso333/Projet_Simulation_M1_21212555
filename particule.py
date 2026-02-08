@@ -82,26 +82,39 @@ class ParticuleLagrange(object):
     def gameDraw(self,scale,screen, centre=(512, 390), angle=0):
         import pygame, math
         
-        # 1) Calcul de la position X, Y à partir de d et de l'angle
-        # d est en mètres, alors on multiplie par scale pour avoir des pixels
+        # 1) Position de la masse
         dist_px = self.getPosition() * scale
-        
-        # Coordonnées cartésiennes (Y inversé pour Pygame)
         X = int(centre[0] + dist_px * math.cos(angle))
         Y = int(centre[1] - dist_px * math.sin(angle))
         
-        # 2) Dessin du ressort (ligne grise entre le centre et la particule)
-        pygame.draw.line(screen, (150, 150, 150), centre, (X, Y), 2)
+        # 2) Calcul des points du ressort
+        nodes = 10
+        points_ressort = []
+        for i in range(nodes + 1):
+            p = i / nodes
+            # Position de base sur la ligne droite
+            curr_x = centre[0] + (dist_px * p) * math.cos(angle)
+            curr_y = centre[1] - (dist_px * p) * math.sin(angle)
+            
+            # --- CORRECTION INDENTATION : Tout ceci doit être DANS la boucle for ---
+            if 0 < i < nodes:
+                # On calcule l'angle perpendiculaire pour le zigzag
+                perp_angle = angle + math.pi/2
+                # On fait osciller l'amplitude (10 pixels de chaque côté)
+                amplitude = 10 if i % 2 == 0 else -10 
+                curr_x += amplitude * math.cos(perp_angle)
+                curr_y -= amplitude * math.sin(perp_angle)
+                
+            points_ressort.append((curr_x, curr_y)) # On ajoute chaque point du zigzag
+        # -----------------------------------------------------------------------
+
+        # 3) Dessin du ressort (Ligne brisée)
+        if len(points_ressort) > 1:
+            pygame.draw.lines(screen, (120, 120, 120), False, points_ressort, 2)
         
-        # 3) Dessin de la particule (un cercle)
-        size = 8
-        pygame.draw.circle(screen, self.color, (X, Y), size)
-        
-        # 4) un petit trait pour visualiser la vitesse radiale dot_d
-        v_rad = self.getSpeed() * scale * 0.1 # On réduit un peu pour la visibilité
-        VX = int(v_rad * math.cos(angle))
-        VY = int(-v_rad * math.sin(angle))
-        pygame.draw.line(screen, (0, 0, 0), (X, Y), (X + VX, Y + VY), 2)
+        # 4) Dessin de la masse (Un beau cercle avec contour)
+        pygame.draw.circle(screen, self.color, (X, Y), 12) 
+        pygame.draw.circle(screen, (0, 0, 0), (X, Y), 12, 2) # Contour noir pour le relief
 
     def solution_analytique(self, temps, omega_moteur):
 

@@ -106,7 +106,8 @@ if __name__=='__main__':
 
     P = m_bf.Kp = 10 # valeur arbitraire
     I = m_bf.Ki = 50 # valeur arbitraire
-    D = m_bf.Kd = 10
+    D = m_bf.Kd = 0.1
+
 
 
     control = ControlPID_vitesse_3(P,I,D , m_bf)

@@ -111,7 +111,7 @@ if __name__=='__main__':
     #calcul d_eq initial : 
     deq = [moteur_centrifugeuse.calcul_d_eq()]
 
-    while t<100 : #tester pour d'autre temps, il s'amorti 
+    while t<2 : #tester pour d'autre temps, il s'amorti 
         t=t+step
         temps.append(t)
 
