@@ -332,7 +332,7 @@ if __name__=='__main__':
 
     #Longueur du pendule : 
     l_pendule = 15
-    angle_pendule = math.pi/2 + 0.1  #on met le pendule tête en haut cette fois-ci avec une toute petite perturbation pour qu'il tombe
+    angle_pendule = math.pi/2 + 0.01  #on met le pendule tête en haut cette fois-ci avec une toute petite perturbation pour qu'il tombe
     pos_x = 50 + l_pendule * math.cos(angle_pendule)
     pos_y = 50 + l_pendule*math.sin(angle_pendule)
     pendule = Barre2D(mass=1,long=l_pendule,pos=V3D(pos_x, pos_y), fixed=False, color="green", nom="mobile", theta=angle_pendule) 
@@ -347,14 +347,19 @@ if __name__=='__main__':
     ## Initialisation du PID
     KP = 60000 # valeur arbitraire
     KI = 0 #valeur arbitraire
-    KD = 15000 #valeur arbitraire
+    KD = 30000 #valeur arbitraire
     controleur = ControlPID_angle(K_P=KP, K_I=KI, K_D=KD)
 
     #on définit l'angle désiré 
     controleur.setTarget(math.pi/2)
 
-    #on s'occupe de la base mobile
-    def base_mobile(self,events,keys) : 
+    #gestion don controleur et de la base mobile
+    def control_angle(self, events, keys) : 
+        angle_actuel = pendule.theta[-1]
+        # calcul du pid 
+        force_ctrl = controleur.simule(monUnivers.step, angle_actuel)
+
+        #ajout clavier
         force_moteur = 0 #force appliquée au pendule
 
         #contrôle utilisateur
@@ -363,13 +368,19 @@ if __name__=='__main__':
 
         if keys[pygame.K_RIGHT]: 
             force_moteur = -500
-           
-        # on applique la force au cdm
-        base.applyEffort(Force=V3D(force_moteur, 0, 0))
 
-        #nouvelle approche : comme les liaisons avec les ressorts marchaient pas du tout pour bloquer l'axe y et l'angle de la base:
-        #on bloque manuellement
+        #somme des deux forces
+        force = force_ctrl+force_moteur
 
+        #ajout pour éviter que la force devienne infinie et créer ue énième instabilité numérique
+        if force > 50000: 
+            force = 50000
+        if force < -50000:
+            force = -50000
+
+        # application de la force
+        base.applyEffort(Force=V3D(force, 0, 0))
+        
         #y
         base.pos[-1].y = 50.0
         base.vitesse[-1].y = 0
@@ -379,22 +390,6 @@ if __name__=='__main__':
         base.theta[-1] = 0
         base.omega[-1] = 0
         base.omegadot[-1] = 0
-
-    def control_angle(self, events, keys) : 
-        angle_actuel = pendule.theta[-1]
-        # calcul du pid 
-        force = controleur.simule(monUnivers.step, angle_actuel)
-
-        #ajout pour éviter que la force devienne infinie et créer ue énième instabilité numérique
-        if force > 50000: 
-            force = 50000
-        if force < -50000:
-            force = -50000
-
-
-        # application de la force
-        base.applyEffort(Force=V3D(force, 0, 0))
-        base_mobile(self,events, keys)
     
        # Injection de la logique dans l'univers
     monUnivers.gameInteraction = MethodType(control_angle, monUnivers)
