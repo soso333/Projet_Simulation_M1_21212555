@@ -5,6 +5,7 @@ import pygame
 from pygame.locals import *
 from types import MethodType
 import math
+from PID_pendule_inverse import ControlPID_angle
 
 class Univers(object):
     def __init__(self,name='ici',t0=0,step=0.1,dimensions=(100,100),game=False,gameDimensions=(1024,780),fps=60):
@@ -324,16 +325,16 @@ if __name__=='__main__':
     from pylab import figure, show, legend
     
     monUnivers = Univers(game=True)
-    monUnivers.step=0.001
+    monUnivers.step=0.00001
 
+    # Création de la base mobile
     base = Barre2D(mass=5, long=12, pos=V3D(50,50,0), theta=0, fixed=False, nom="fixe") 
 
     #Longueur du pendule : 
     l_pendule = 15
-    angle_pendule = -math.pi/2  #on met le pendule tête en haut pour qu'il soit cohérent avec la théorie
+    angle_pendule = math.pi/2 + 0.1  #on met le pendule tête en haut cette fois-ci avec une toute petite perturbation pour qu'il tombe
     pos_x = 50 + l_pendule * math.cos(angle_pendule)
     pos_y = 50 + l_pendule*math.sin(angle_pendule)
-
     pendule = Barre2D(mass=1,long=l_pendule,pos=V3D(pos_x, pos_y), fixed=False, color="green", nom="mobile", theta=angle_pendule) 
     
     #liaison pivot et base mobile
@@ -342,6 +343,15 @@ if __name__=='__main__':
     force = Gravity(V3D(0,-10))
     monUnivers.addParticule(base,pendule)
     monUnivers.addGenerators(force,liaison) 
+
+    ## Initialisation du PID
+    KP = 60000 # valeur arbitraire
+    KI = 0 #valeur arbitraire
+    KD = 15000 #valeur arbitraire
+    controleur = ControlPID_angle(K_P=KP, K_I=KI, K_D=KD)
+
+    #on définit l'angle désiré 
+    controleur.setTarget(math.pi/2)
 
     #on s'occupe de la base mobile
     def base_mobile(self,events,keys) : 
@@ -370,8 +380,24 @@ if __name__=='__main__':
         base.omega[-1] = 0
         base.omegadot[-1] = 0
 
-    # Injection de la logique dans l'univers
-    monUnivers.gameInteraction = MethodType(base_mobile, monUnivers)
+    def control_angle(self, events, keys) : 
+        angle_actuel = pendule.theta[-1]
+        # calcul du pid 
+        force = controleur.simule(monUnivers.step, angle_actuel)
+
+        #ajout pour éviter que la force devienne infinie et créer ue énième instabilité numérique
+        if force > 50000: 
+            force = 50000
+        if force < -50000:
+            force = -50000
+
+
+        # application de la force
+        base.applyEffort(Force=V3D(force, 0, 0))
+        base_mobile(self,events, keys)
+    
+       # Injection de la logique dans l'univers
+    monUnivers.gameInteraction = MethodType(control_angle, monUnivers)
     monUnivers.simulateRealTime()
 
     #solution analytique
