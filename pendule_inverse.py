@@ -304,6 +304,19 @@ except Exception as e:
     # On peut lever l'erreur pour arrêter le script si le débug échoue
     raise e
 
+def solution_analytique(temps, theta, L, theta0, a) : 
+    import numpy as np
+    g = 10
+    omega = np.sqrt((3*g)/(2*L))
+
+    #creation du vecteur temps 
+    tps = np.array(temps)
+
+    #solution ana
+    theta_ana = (theta0/2)*(np.exp(omega*tps) + np.exp(-omega*tps)) + a/g
+    return theta_ana
+
+
 #--------------------------------------------
 
 if __name__=='__main__':
@@ -317,7 +330,7 @@ if __name__=='__main__':
 
     #Longueur du pendule : 
     l_pendule = 15
-    angle_pendule = -math.pi/2
+    angle_pendule = math.pi/2 + 0.1 #on met le pendule tête en haut pour qu'il soit cohérent avec la théorie
     pos_x = 50 + l_pendule * math.cos(angle_pendule)
     pos_y = 50 + l_pendule*math.sin(angle_pendule)
 
@@ -360,5 +373,15 @@ if __name__=='__main__':
     # Injection de la logique dans l'univers
     monUnivers.gameInteraction = MethodType(base_mobile, monUnivers)
     monUnivers.simulateRealTime()
-    monUnivers.simulateRealTime()
+
+    #solution analytique
+    import numpy as np
+    import matplotlib.pyplot as plt
+    g = 10
+    temps_sim = np.array(monUnivers.time)
+    omega = np.sqrt((3*g)/(2*l_pendule))
+    theta_ana = solution_analytique(temps=temps_sim, theta=np.array(pendule.theta), L = l_pendule, theta0= 0.1, a = 0)
+    plt.figure()
+    plt.plot(temps_sim, (np.array(pendule.theta) - (math.pi/2)), label="Simulation", color="blue")
+    plt.plot(temps_sim,theta_ana, label="Analytique", color="red")
     monUnivers.plot()
