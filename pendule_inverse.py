@@ -330,7 +330,7 @@ if __name__=='__main__':
 
     #Longueur du pendule : 
     l_pendule = 15
-    angle_pendule = math.pi/2 + 0.1 #on met le pendule tête en haut pour qu'il soit cohérent avec la théorie
+    angle_pendule = -math.pi/2  #on met le pendule tête en haut pour qu'il soit cohérent avec la théorie
     pos_x = 50 + l_pendule * math.cos(angle_pendule)
     pos_y = 50 + l_pendule*math.sin(angle_pendule)
 
