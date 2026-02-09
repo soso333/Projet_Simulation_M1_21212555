@@ -312,44 +312,53 @@ if __name__=='__main__':
     
     monUnivers = Univers(game=True)
     monUnivers.step=0.001
+
+    base = Barre2D(mass=5, long=12, pos=V3D(50,50,0), theta=0, fixed=False, nom="fixe") 
+
+    #Longueur du pendule : 
+    l_pendule = 15
+    angle_pendule = -math.pi/2
+    pos_x = 50 + l_pendule * math.cos(angle_pendule)
+    pos_y = 50 + l_pendule*math.sin(angle_pendule)
+
+    pendule = Barre2D(mass=1,long=l_pendule,pos=V3D(pos_x, pos_y), fixed=False, color="green", nom="mobile", theta=angle_pendule) 
     
-    #définition de la base mobile, uniquement horizontalement
-    base_mobile = Barre2D(mass= 5.0, long=10, pos=V3D(50,50), color="blue", nom="base_mobile")
-
-    #définition de lu pendule
-    pendule = Barre2D(mass=1, long=15, pos=V3D(50,57.5), theta=0.2, color="green", nom="pendule")
-
-    #on définit la liaison pivot entre le pendule et la base mobile : 
-    liaison = Liaison.pivot(base_mobile, pendule, pos1=V3D(0,0), pos2=V3D(0,-7.5), k=20000, c=5, l0=0)
-
-    # on définit deux liaisons : une selon rotation et une selon y car on bloque ces mouvements
-    objet_fixe = Barre2D(pos=V3D(50,50), fixed=True)
-
-    liaison_2 = TorsionSpringDumper(base_mobile, objet_fixe, k_rot=10000, c_rot=100)
-    #nous avons besoin de bloquer l'objet fixe selon y, pour ne pas qu'il tombe à cause de la gravité, nous nous servons de dump pour contrôler cela 
-    liaison_3 = SpringDumper(base_mobile, objet_fixe, k=10000,c=100, l0 = 0, pos0=V3D(0,0), pos1=V3D(0,0))
+    #liaison pivot et base mobile
+    liaison = Liaison.pivot(barre1=base, barre2=pendule, k=40000, c=300, pos1=V3D(0, 0), pos2=V3D(-l_pendule/2,0))
     
-    #force supplémentaire
     force = Gravity(V3D(0,-10))
+    monUnivers.addParticule(base,pendule)
+    monUnivers.addGenerators(force,liaison) 
 
-    # ajout à l'univers
-    monUnivers.addParticule(base_mobile, pendule)
-    monUnivers.addGenerators(liaison, liaison_2, force, liaison_3)
+    #on s'occupe de la base mobile
+    def base_mobile(self,events,keys) : 
+        force_moteur = 0 #force appliquée au pendule
 
-    def myInteraction(self,events,keys):
-        # Application des forces, l'axe x est piloté en force
+        #contrôle utilisateur
+        if keys[pygame.K_LEFT] : 
+            force_moteur = 500 #N
 
-       for i in self.population : 
-                  if i.nom == "base_mobile" :  
-                       force_value = 0
-                       if keys[pygame.K_LEFT] : 
-                          i.applyEffort(Force=V3D(-50, 0, 0))
-                       if keys[pygame.K_RIGHT] : 
-                          i.applyEffort(Force=V3D(50, 0, 0))
+        if keys[pygame.K_RIGHT]: 
+            force_moteur = -500
+           
+        # on applique la force au cdm
+        base.applyEffort(Force=V3D(force_moteur, 0, 0))
 
-         
-# Surcharge de la fonction ici
-    monUnivers.gameInteraction = MethodType(myInteraction,monUnivers)
- 
+        #nouvelle approche : comme les liaisons avec les ressorts marchaient pas du tout pour bloquer l'axe y et l'angle de la base:
+        #on bloque manuellement
+
+        #y
+        base.pos[-1].y = 50.0
+        base.vitesse[-1].y = 0
+        base.acceleration[-1].y = 0
+        
+        # rotation
+        base.theta[-1] = 0
+        base.omega[-1] = 0
+        base.omegadot[-1] = 0
+
+    # Injection de la logique dans l'univers
+    monUnivers.gameInteraction = MethodType(base_mobile, monUnivers)
+    monUnivers.simulateRealTime()
     monUnivers.simulateRealTime()
     monUnivers.plot()
